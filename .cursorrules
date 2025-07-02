@@ -1,0 +1,257 @@
+# Cursor Rules for Next.js 15 + TypeScript + Tailwind CSS 4 Project
+
+## 项目概述
+这是一个使用 Next.js 15、TypeScript、React 19 和 Tailwind CSS 4 的现代化 Web 应用项目。
+
+## 🎮 游戏机制核心理解（重要！）
+
+### 贪吃蛇消消乐游戏规则
+这是一个结合贪吃蛇和消消乐机制的创新游戏，开发时必须严格遵循以下核心规则：
+
+#### 蛇的组成结构
+1. **蛇头（snake[0]）**：
+   - 固定白色外观，带黑色眼睛
+   - 永远不设置 `color` 属性（保持 `undefined`）
+   - 不参与颜色匹配和消除逻辑
+   - 仅用于移动控制和碰撞检测
+
+2. **蛇身（snake[1+]）**：
+   - 每个身体段都有 `color` 属性
+   - 颜色来源于吃掉的食物
+   - 参与消除匹配逻辑
+
+#### 消除机制
+- 新增身体段插入到蛇头**之后**（成为snake[1]）
+- 检查连续相同颜色的身体段（≥3个）
+- 执行消除并获得分数
+- **蛇头永远不参与消除**
+
+#### 开发禁忌
+❌ **绝对不要**：
+- 给蛇头设置颜色属性
+- 让蛇头参与消除逻辑
+- 将蛇头算作身体的一部分
+- 在消除时包含蛇头
+
+✅ **正确做法**：
+- 蛇头始终保持白色外观
+- 只对身体段进行颜色操作
+- 消除逻辑只涉及身体段
+
+## 技术栈规范
+
+### 核心技术
+- **Framework**: Next.js 15 (App Router)
+- **Language**: TypeScript 5
+- **React**: React 19 + React DOM 19
+- **Styling**: Tailwind CSS 4 (最新版本)
+- **Package Manager**: pnpm (首选)
+
+### 开发工具
+- **Dev Mode**: 使用 `--turbopack` 进行快速开发
+- **Linting**: Next.js 内置 ESLint
+- **Type Checking**: TypeScript 严格模式
+
+## 代码规范
+
+### TypeScript 规范
+- 严格遵循 TypeScript 严格模式设置
+- 使用 `@/*` 路径别名进行模块导入
+- 优先使用类型推断，必要时显式声明类型
+- 组件 props 必须定义接口类型
+
+```typescript
+// ✅ 正确的组件类型定义
+interface ButtonProps {
+  children: React.ReactNode;
+  onClick?: () => void;
+  variant?: 'primary' | 'secondary';
+  disabled?: boolean;
+}
+
+export default function Button({ children, onClick, variant = 'primary', disabled }: ButtonProps) {
+  // 组件实现
+}
+```
+
+### Next.js App Router 规范
+- 使用 App Router 结构 (`app/` 目录)
+- 页面组件使用 `page.tsx` 命名
+- 布局组件使用 `layout.tsx` 命名
+- 服务端组件为默认，客户端组件需明确标记 `'use client'`
+- 使用 Next.js 15 的最新特性和最佳实践
+
+### React 19 特性
+- 充分利用 React 19 的新特性和改进
+- 使用现代化的 Hook 模式
+- 优先使用函数组件和 Hooks
+
+### Tailwind CSS 4 规范
+- 使用 Tailwind CSS 4 的最新语法和特性
+- 利用 `@theme inline` 配置自定义主题
+- 响应式设计优先（mobile-first）
+- 使用语义化的颜色变量
+
+```css
+/* ✅ 正确的主题配置 */
+@theme inline {
+  --color-primary: #3b82f6;
+  --color-secondary: #64748b;
+  --radius-base: 0.5rem;
+}
+```
+
+## 文件结构规范
+
+### 目录组织
+```
+cursor_game/
+├── app/                    # Next.js App Router
+│   ├── (routes)/          # 路由组
+│   ├── components/        # 页面级组件
+│   ├── globals.css        # 全局样式
+│   ├── layout.tsx         # 根布局
+│   └── page.tsx          # 首页
+├── components/            # 可复用组件
+│   ├── ui/               # 基础 UI 组件
+│   └── features/         # 功能组件
+├── lib/                  # 工具函数和配置
+├── types/               # TypeScript 类型定义
+├── hooks/               # 自定义 Hooks
+└── public/              # 静态资源
+```
+
+### 命名规范
+- **组件**: PascalCase (`Button.tsx`, `UserProfile.tsx`)
+- **页面**: `page.tsx`, `layout.tsx`, `loading.tsx`, `error.tsx`
+- **工具函数**: camelCase (`formatDate.ts`, `apiClient.ts`)
+- **类型定义**: PascalCase + 后缀 (`UserType`, `ApiResponse`)
+- **常量**: UPPER_SNAKE_CASE (`API_BASE_URL`, `DEFAULT_TIMEOUT`)
+
+## 组件开发规范
+
+### 组件结构模板
+```typescript
+'use client'; // 仅在需要客户端功能时添加
+
+import { useState, useEffect } from 'react';
+import { cn } from '@/lib/utils'; // 如果使用 clsx/tailwind-merge
+
+interface ComponentProps {
+  // 类型定义
+}
+
+export default function Component({ ...props }: ComponentProps) {
+  // Hooks
+  // 事件处理函数
+  // 渲染逻辑
+  
+  return (
+    <div className="flex items-center justify-center">
+      {/* JSX 内容 */}
+    </div>
+  );
+}
+```
+
+### Tailwind CSS 使用规范
+- 使用响应式前缀：`sm:`, `md:`, `lg:`, `xl:`, `2xl:`
+- 状态变体：`hover:`, `focus:`, `active:`, `disabled:`
+- 深色模式：`dark:` 前缀
+- 组合类名时保持可读性
+
+```tsx
+// ✅ 良好的 Tailwind 类名组织
+<button className="
+  px-4 py-2 
+  bg-blue-500 hover:bg-blue-600 
+  text-white font-medium 
+  rounded-lg shadow-sm 
+  transition-colors duration-200
+  disabled:opacity-50 disabled:cursor-not-allowed
+  dark:bg-blue-600 dark:hover:bg-blue-700
+">
+  Click me
+</button>
+```
+
+## 性能优化规范
+
+### Next.js 优化
+- 使用 `next/image` 进行图片优化
+- 适当使用 `next/font` 进行字体优化
+- 合理使用 Server Components 和 Client Components
+- 利用 Next.js 15 的 Turbopack 进行快速开发
+
+### React 优化
+- 使用 `React.memo` 优化重渲染
+- 合理使用 `useMemo` 和 `useCallback`
+- 避免在 JSX 中创建内联对象和函数
+
+## 状态管理规范
+- 优先使用 React 内置状态管理（useState, useReducer, Context）
+- 复杂状态考虑使用 Zustand 或 Redux Toolkit
+- 服务端状态使用 TanStack Query (React Query)
+
+## API 和数据获取
+- 使用 Next.js App Router 的 Server Actions
+- 客户端数据获取使用 SWR 或 TanStack Query
+- API 路由放在 `app/api/` 目录下
+
+## 错误处理和边界
+- 使用 `error.tsx` 处理页面级错误
+- 使用 `loading.tsx` 提供加载状态
+- 实现适当的错误边界组件
+
+## 测试规范
+- 单元测试：Jest + React Testing Library
+- E2E 测试：Playwright
+- 组件测试文件命名：`Component.test.tsx`
+
+## 开发工作流
+
+### 命令规范
+```bash
+# 开发环境（使用 Turbopack）
+pnpm dev
+
+# 构建项目
+pnpm build
+
+# 生产环境启动
+pnpm start
+
+# 代码检查
+pnpm lint
+```
+
+### Git 提交规范
+- 使用 Conventional Commits 格式
+- 类型：feat, fix, docs, style, refactor, test, chore
+- 示例：`feat: add user authentication component`
+
+## 可访问性 (A11y)
+- 使用语义化 HTML 元素
+- 提供适当的 ARIA 属性
+- 确保键盘导航支持
+- 保持足够的颜色对比度
+
+## 安全规范
+- 使用 Next.js 内置的安全特性
+- 避免 XSS 攻击，谨慎使用 `dangerouslySetInnerHTML`
+- 环境变量使用 `NEXT_PUBLIC_` 前缀进行客户端暴露
+
+## 代码质量
+- 保持函数简洁，单一职责
+- 使用有意义的变量和函数命名
+- 添加必要的注释，特别是复杂逻辑
+- 定期重构和优化代码
+
+## 部署和环境
+- 开发环境：`pnpm dev`
+- 生产构建：`pnpm build && pnpm start`
+- 环境变量配置在 `.env.local` 文件中
+
+---
+
+遵循这些规范将确保代码的一致性、可维护性和最佳性能。在开发过程中，始终考虑用户体验、性能优化和代码质量。 
