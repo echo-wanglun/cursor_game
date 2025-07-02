@@ -112,6 +112,58 @@ export function performElimination(snake: SnakeSegment[], eliminatedIndices: num
 }
 
 /**
+ * 执行消除并重构蛇身，让后续方块瞬间填补空隙
+ * @param snake 原蛇
+ * @param bodyColors 身体颜色数组
+ * @param eliminatedIndices 要消除的段的索引数组
+ * @returns { newSnake: 重构后的蛇, newBodyColors: 重构后的颜色数组 }
+ */
+export function performEliminationWithCompression(
+  snake: SnakeSegment[], 
+  bodyColors: FoodColor[], 
+  eliminatedIndices: number[]
+): { newSnake: SnakeSegment[], newBodyColors: FoodColor[] } {
+  // 确保蛇头不被消除
+  if (eliminatedIndices.includes(0)) {
+    throw new Error('消除操作错误：蛇头不能被消除');
+  }
+  
+  console.log('🔧 开始消除并重构蛇身:', {
+    originalSnakeLength: snake.length,
+    originalBodyColorsLength: bodyColors.length,
+    eliminatedIndices,
+    eliminatedCount: eliminatedIndices.length
+  });
+  
+  // 从bodyColors中移除对应的颜色（注意索引转换：snake[i] 对应 bodyColors[i-1]）
+  const newBodyColors = bodyColors.filter((_, colorIndex) => {
+    const snakeIndex = colorIndex + 1; // bodyColors[i] 对应 snake[i+1]
+    return !eliminatedIndices.includes(snakeIndex);
+  });
+  
+  // 保留未被消除的蛇身段，保持它们的原始位置
+  const remainingSegments = snake.filter((_, index) => !eliminatedIndices.includes(index));
+  
+  console.log('✅ 蛇身重构完成:', {
+    newSnakeLength: remainingSegments.length,
+    newBodyColorsLength: newBodyColors.length,
+    headPosition: { x: remainingSegments[0].x, y: remainingSegments[0].y },
+    bodyPositions: remainingSegments.slice(1).map(seg => ({ x: seg.x, y: seg.y }))
+  });
+  
+  // 更新剩余身体段的颜色
+  const newSnake = remainingSegments.map((segment, index) => ({
+    ...segment,
+    color: index === 0 ? undefined : newBodyColors[index - 1] // 蛇头没有颜色
+  }));
+  
+  return {
+    newSnake,
+    newBodyColors
+  };
+}
+
+/**
  * 计算消除得分
  * @param eliminatedCount 消除的段数
  * @param comboCount 连击数（从1开始）

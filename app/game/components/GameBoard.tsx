@@ -1,15 +1,17 @@
 import React from 'react';
-import { GameState } from '@/types/game';
-import { GAME_CONFIG, COLOR_CLASS_MAP } from '@/lib/constants';
 import Snake from './Snake';
 import Food from './Food';
-import SpecialFood from './SpecialFood';
+import { SnakeSegment, Food as FoodType, FoodColor } from '@/types/game';
+import { GAME_CONFIG } from '@/lib/constants';
 
 interface GameBoardProps {
-  gameState: GameState;
+  snake: SnakeSegment[];
+  bodyColors: FoodColor[];
+  foods: FoodType[];
+  specialFoods: any[]; // 保留接口但不使用
 }
 
-export default function GameBoard({ gameState }: GameBoardProps) {
+export default function GameBoard({ snake, bodyColors, foods }: GameBoardProps) {
   // 创建网格
   const createGrid = () => {
     const grid = [];
@@ -24,33 +26,35 @@ export default function GameBoard({ gameState }: GameBoardProps) {
   const grid = createGrid();
 
   return (
-    <div className="relative bg-gray-800 border-2 border-gray-600 rounded-lg p-2">
+    <div className="relative bg-gray-800 p-4 rounded-lg">
+      {/* 游戏网格 */}
       <div 
-        className="grid gap-px bg-gray-700 p-1 rounded"
+        className="grid gap-[1px] bg-gray-700 p-1"
         style={{
-          gridTemplateColumns: `repeat(${GAME_CONFIG.gridWidth}, minmax(0, 1fr))`,
-          aspectRatio: '1',
+          gridTemplateColumns: `repeat(${GAME_CONFIG.gridWidth}, 1fr)`,
+          gridTemplateRows: `repeat(${GAME_CONFIG.gridHeight}, 1fr)`,
+          aspectRatio: '1/1',
+          maxWidth: '600px',
+          maxHeight: '600px'
         }}
       >
-        {grid.map(({ x, y }) => (
+        {grid.map((cell) => (
           <div
-            key={`${x}-${y}`}
-            className="bg-gray-800 aspect-square relative"
+            key={`${cell.x}-${cell.y}`}
+            className="bg-gray-900 aspect-square relative"
           >
             {/* 渲染蛇身 */}
-            <Snake snake={gameState.snake} cellX={x} cellY={y} />
+            <Snake 
+              snake={snake} 
+              bodyColors={bodyColors} 
+              cellX={cell.x} 
+              cellY={cell.y} 
+            />
             
             {/* 渲染食物 */}
-            {gameState.foods.map((food, index) => (
-              food.x === x && food.y === y && (
+            {foods.map((food, index) => (
+              food.x === cell.x && food.y === cell.y && (
                 <Food key={`food-${index}`} food={food} />
-              )
-            ))}
-            
-            {/* 渲染特殊食物 */}
-            {gameState.specialFoods.map((specialFood, index) => (
-              specialFood.x === x && specialFood.y === y && (
-                <SpecialFood key={`special-${index}`} specialFood={specialFood} />
               )
             ))}
           </div>
