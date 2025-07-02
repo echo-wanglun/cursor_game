@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { Food, SnakeSegment, FoodColor, SpecialFood } from '@/types/game';
+import { Food, SnakeSegment, FoodColor } from '@/types/game';
 import { FOOD_COLORS, GAME_CONFIG } from '@/lib/constants';
 
 /**
@@ -14,8 +14,7 @@ export function useFoodSystem() {
   // 生成随机食物
   const generateFood = useCallback((
     snake: SnakeSegment[], 
-    existingFoods: Food[], 
-    specialFoods: SpecialFood[] = []
+    existingFoods: Food[]
   ): Food => {
     const occupiedPositions = new Set<string>();
     
@@ -27,11 +26,6 @@ export function useFoodSystem() {
     // 记录现有食物占用的位置
     existingFoods.forEach(food => {
       occupiedPositions.add(`${food.x},${food.y}`);
-    });
-    
-    // 🔥 重要修复：记录特殊方块占用的位置，避免被普通食物覆盖
-    specialFoods.forEach(specialFood => {
-      occupiedPositions.add(`${specialFood.x},${specialFood.y}`);
     });
     
     // 寻找空白位置
@@ -64,13 +58,12 @@ export function useFoodSystem() {
   
   // 生成初始食物数组
   const generateInitialFoods = useCallback((
-    snake: SnakeSegment[], 
-    specialFoods: SpecialFood[] = []
+    snake: SnakeSegment[]
   ): Food[] => {
     const foods: Food[] = [];
     
     for (let i = 0; i < GAME_CONFIG.foodCount; i++) {
-      const food = generateFood(snake, foods, specialFoods);
+      const food = generateFood(snake, foods);
       foods.push(food);
     }
     
@@ -88,16 +81,15 @@ export function useFoodSystem() {
   const updateFoodsAfterEating = useCallback((
     foods: Food[], 
     eatenFood: Food, 
-    snake: SnakeSegment[],
-    specialFoods: SpecialFood[] = []
+    snake: SnakeSegment[]
   ): Food[] => {
     // 移除被吃掉的食物
     const remainingFoods = foods.filter(food => 
       !(food.x === eatenFood.x && food.y === eatenFood.y)
     );
     
-    // 生成新食物，避开特殊方块
-    const newFood = generateFood(snake, remainingFoods, specialFoods);
+    // 生成新食物
+    const newFood = generateFood(snake, remainingFoods);
     
     return [...remainingFoods, newFood];
   }, [generateFood]);
